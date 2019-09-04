@@ -1,5 +1,9 @@
 #include "stdio.h"
 #include "stdlib.h"
+#include "sys/types.h"
+#include "sys/stat.h"
+#include "dirent.h"
+#include "string.h"
 
 //build a stack with linked lists
 struct StackNode {
@@ -44,15 +48,34 @@ char* peek(struct StackNode* root) {
   return root->data;
 }
 
-int main() {
-
+int main(int argc, char* argv[]) {
+  //set up stack
   struct StackNode* root = NULL;
+  // set up directory entry
+  struct dirent *de;
 
-  push(&root, "butt");
-  push(&root, "shit");
-  push(&root, "piss");
+  char buffer[512];
+  struct stat mystat;
 
-  printf("%s popped from stack\n", pop(&root));
+  //open directory
+  DIR *dr = opendir(".");
+
+  //sweet ass error handling
+  if (dr == NULL) {
+    printf("Could not open current directory");
+    return 0;
+  }
+
+  //push everything into the stack
+  while ((de = readdir(dr)) != NULL) {
+    sprintf(buffer, "%s/%s", argv[1], de->d_name);
+    stat(buffer, &mystat);
+    push(&root, de->d_name);
+  }
+
   printf("Top element is %s\n", peek(root));
+
+  closedir(dr);
+  return 0;
 
 }
