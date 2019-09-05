@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
   struct stat mystat;
 
   //open directory
-  DIR *dr = opendir(".");
+  DIR *dr = opendir(argv[1]);
 
   //sweet ass error handling
   if (dr == NULL) {
@@ -70,6 +70,8 @@ int main(int argc, char* argv[]) {
   while ((de = readdir(dr)) != NULL) {
     sprintf(buffer, "%s/%s", argv[1], de->d_name);
     stat(buffer, &mystat);
+    printf("%d", mystat.st_size);
+    printf(" %s\n", de->d_name);
     push(&root, de->d_name);
   }
 
