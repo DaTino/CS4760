@@ -1,14 +1,14 @@
-#include "stdio.h"
-#include "stdlib.h"
-#include "sys/types.h"
-#include "sys/stat.h"
-#include "dirent.h"
-#include "string.h"
-#include "unistd.h"
-#include "pwd.h"
-#include "grp.h"
-#include "locale.h"
-#include "langinfo.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <dirent.h>
+#include <string.h>
+#include <unistd.h>
+#include <pwd.h>
+#include <grp.h>
+#include <locale.h>
+#include <langinfo.h>
 
 //build a stack with linked lists
 //don't need this for recursive
