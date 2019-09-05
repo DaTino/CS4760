@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -g -Wall -std=c11
+CFLAGS = -g -Wall -std=c11 -D_BSD_SOURCE
 TARGET = dt
 
 all: $(TARGET)
