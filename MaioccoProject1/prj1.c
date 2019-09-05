@@ -78,7 +78,7 @@ void dtRecursive(char* dir, int indents, int flags[], int faSize) {
       printf("%*s%s\t", indents, "", dirEnt->d_name);
           // L follow symbolic links
           // t print info on file type
-          if (flags[6] || flags[10]) {
+          if (flags[8] || flags[10]) {
             switch (dirStats.st_mode &S_IFMT) {
               case S_IFDIR: printf("%16s", "d"); break;
               case S_IFREG: printf("%16s", "-"); break;
@@ -89,7 +89,7 @@ void dtRecursive(char* dir, int indents, int flags[], int faSize) {
           }
 
           // p pint permission bits
-          if(flags[8] || flags[10]) {
+          if(flags[6] || flags[10]) {
             printf( (dirStats.st_mode & S_IRUSR) ? "r" : "-");
             printf( (dirStats.st_mode & S_IWUSR) ? "w" : "-");
             printf( (dirStats.st_mode & S_IXUSR) ? "x" : "-");
@@ -122,7 +122,7 @@ void dtRecursive(char* dir, int indents, int flags[], int faSize) {
           }
           // s print file size in k, if a meg m, if a gig g
           if(flags[7] || flags[10]) {
-            printf("%9jd", (intmax_t)dirStats.st_size);
+            printf("%9jd", dirStats.st_size);
           }
           // d time of last modification
           if(flags[3]) {
@@ -136,7 +136,7 @@ void dtRecursive(char* dir, int indents, int flags[], int faSize) {
       printf("%*s%s\t", indents, "", dirEnt->d_name);
           // L follow symbolic links
           // t print info on file type
-          if (flags[6] || flags[10]) {
+          if (flags[8] || flags[10]) {
             switch (dirStats.st_mode &S_IFMT) {
               case S_IFDIR: printf("%16s", "d"); break;
               case S_IFREG: printf("%16s", "-"); break;
@@ -147,7 +147,7 @@ void dtRecursive(char* dir, int indents, int flags[], int faSize) {
           }
 
           // p pint permission bits
-          if(flags[8] || flags[10]) {
+          if(flags[6] || flags[10]) {
             printf( (dirStats.st_mode & S_IRUSR) ? "r" : "-");
             printf( (dirStats.st_mode & S_IWUSR) ? "w" : "-");
             printf( (dirStats.st_mode & S_IXUSR) ? "x" : "-");
@@ -180,7 +180,7 @@ void dtRecursive(char* dir, int indents, int flags[], int faSize) {
           }
           // s print file size in k, if a meg m, if a gig g
           if(flags[7] || flags[10]) {
-            printf("%9jd", (intmax_t)dirStats.st_size);
+            printf("%9jd", dirStats.st_size);
           }
           // d time of last modification
           if(flags[3]) {
@@ -240,6 +240,9 @@ int main(int argc, char* argv[]) {
       case 'l':
         lFlag=1;
         break;
+      case '?':
+        perror("dt:bad option\n");
+        return -1;
     }
   }
 
