@@ -5,7 +5,10 @@
 #include "dirent.h"
 #include "string.h"
 #include "unistd.h"
-
+#include "pwd.h"
+#include "grp.h"
+#include "locale.h"
+#include "langinfo.h"
 //build a stack with linked lists
 //don't need this for recursive
 struct StackNode {
@@ -46,10 +49,15 @@ char* peek(struct StackNode* root) {
 }
 
 //recursive directory traversal
-void dtRecursive(char* dir, int indents) {
+void dtRecursive(char* dir, int indents, int flags[], int faSize) {
+
   //Initializing directory entry, stats
   struct dirent *dirEnt;
   struct stat dirStats;
+  struct passwd *pwd;
+  struct group *grp;
+  struct tm *tm;
+  char datestring[256];
 
   //open directory, error and exit if its not found
   DIR *dirName = opendir(dir);
@@ -67,13 +75,119 @@ void dtRecursive(char* dir, int indents) {
       }
       snprintf(buffer, sizeof(buffer), "%s/%s", dir, dirEnt->d_name);
       stat(buffer, &dirStats);
-      printf("%d", dirStats.st_size);
-      printf("%*s%s\n", indents, "", dirEnt->d_name);
-      dtRecursive(buffer, indents + 2);
+      printf("%*s%s\t", indents, "", dirEnt->d_name);
+          // L follow symbolic links
+          // t print info on file type
+          if (flags[6] || flags[10]) {
+            switch (dirStats.st_mode &S_IFMT) {
+              case S_IFDIR: printf("%16s", "d"); break;
+              case S_IFREG: printf("%16s", "-"); break;
+              default: printf("%16s", "");
+            }
+            // if (dirStats.st_mode == DT_DIR) printf("%16s", "d");
+            // printf( (S_ISDIR(dirStats.st_mode)) ? "d" : " ");
+          }
+
+          // p pint permission bits
+          if(flags[8] || flags[10]) {
+            printf( (dirStats.st_mode & S_IRUSR) ? "r" : "-");
+            printf( (dirStats.st_mode & S_IWUSR) ? "w" : "-");
+            printf( (dirStats.st_mode & S_IXUSR) ? "x" : "-");
+            printf( (dirStats.st_mode & S_IRGRP) ? "r" : "-");
+            printf( (dirStats.st_mode & S_IWGRP) ? "w" : "-");
+            printf( (dirStats.st_mode & S_IXGRP) ? "x" : "-");
+            printf( (dirStats.st_mode & S_IROTH) ? "r" : "-");
+            printf( (dirStats.st_mode & S_IWOTH) ? "w" : "-");
+            printf( (dirStats.st_mode & S_IXOTH) ? "x" : "-");
+          }
+
+          // i print number of links to file in inode table
+          if(flags[5]) {
+            printf("%4d", dirStats.st_nlink);
+          }
+          ////:hI:Ldgipstul
+          // u print uid
+          if(flags[9] || flags[10]) {
+            if ((pwd = getpwuid(dirStats.st_uid)) != NULL)
+              printf(" %-8.8s", pwd->pw_name);
+            else
+              printf(" %-8d", dirStats.st_uid);
+          }
+          // g print gid
+          if(flags[4] || flags[10]) {
+            if ((grp = getgrgid(dirStats.st_gid)) != NULL)
+              printf(" %-8.8s", grp->gr_name);
+            else
+              printf(" %-8d", dirStats.st_gid);
+          }
+          // s print file size in k, if a meg m, if a gig g
+          if(flags[7] || flags[10]) {
+            printf("%9jd", (intmax_t)dirStats.st_size);
+          }
+          // d time of last modification
+          if(flags[3]) {
+            printf(" %d", ctime(&dirStats.st_mtime));
+          }
+          // l does tpiugs
+          printf("\n");
+      dtRecursive(buffer, indents + 2, flags, faSize);
     }
     else {
-      printf("%d", dirStats.st_size);
-      printf("%*s%s\n", indents, "", dirEnt->d_name);
+      printf("%*s%s\t", indents, "", dirEnt->d_name);
+          // L follow symbolic links
+          // t print info on file type
+          if (flags[6] || flags[10]) {
+            switch (dirStats.st_mode &S_IFMT) {
+              case S_IFDIR: printf("%16s", "d"); break;
+              case S_IFREG: printf("%16s", "-"); break;
+              default: printf("%16s", "");
+            }
+            // if (dirStats.st_mode == DT_DIR) printf("%16s", "d");
+            // printf( (S_ISDIR(dirStats.st_mode)) ? "d" : " ");
+          }
+
+          // p pint permission bits
+          if(flags[8] || flags[10]) {
+            printf( (dirStats.st_mode & S_IRUSR) ? "r" : "-");
+            printf( (dirStats.st_mode & S_IWUSR) ? "w" : "-");
+            printf( (dirStats.st_mode & S_IXUSR) ? "x" : "-");
+            printf( (dirStats.st_mode & S_IRGRP) ? "r" : "-");
+            printf( (dirStats.st_mode & S_IWGRP) ? "w" : "-");
+            printf( (dirStats.st_mode & S_IXGRP) ? "x" : "-");
+            printf( (dirStats.st_mode & S_IROTH) ? "r" : "-");
+            printf( (dirStats.st_mode & S_IWOTH) ? "w" : "-");
+            printf( (dirStats.st_mode & S_IXOTH) ? "x" : "-");
+          }
+
+          // i print number of links to file in inode table
+          if(flags[5]) {
+            printf("%4d", dirStats.st_nlink);
+          }
+          ////:hI:Ldgipstul
+          // u print uid
+          if(flags[9] || flags[10]) {
+            if ((pwd = getpwuid(dirStats.st_uid)) != NULL)
+              printf(" %-8.8s", pwd->pw_name);
+            else
+              printf(" %-8d", dirStats.st_uid);
+          }
+          // g print gid
+          if(flags[4] || flags[10]) {
+            if ((grp = getgrgid(dirStats.st_gid)) != NULL)
+              printf(" %-8.8s", grp->gr_name);
+            else
+              printf(" %-8d", dirStats.st_gid);
+          }
+          // s print file size in k, if a meg m, if a gig g
+          if(flags[7] || flags[10]) {
+            printf("%9jd", (intmax_t)dirStats.st_size);
+          }
+          // d time of last modification
+          if(flags[3]) {
+            printf(" %d", ctime(&dirStats.st_mtime));
+          }
+          // l does tpiugs
+      printf("\n");
     }
   }
   closedir(dirName);
@@ -85,18 +199,16 @@ int main(int argc, char* argv[]) {
   extern int optind;
   int opt, err = 0;
   int hFlag=0, bigIFlag=0, bigLFlag=0, dFlag=0, gFlag=0,
-      pFlag=0, sFlag=0, tflag=0, uFlag=0, lFlag=0;
-  int flagArray[] = { hFlag, bigIFlag, bigLFlag, dFlag, gFlag,
-      pFlag, sFlag, tflag, uFlag, lFlag };
+      iFlag=0, pFlag=0, sFlag=0, tFlag=0, uFlag=0, lFlag=0;
   int indents = 0;
 
   while((opt = getopt(argc, argv, ":hI:Ldgipstul")) != -1) {
     switch(opt) {
       case 'h':
-        hflag=1;
-        printf("dt: a nice program to depth first traverse a directory.\n
-                all the flags will go here too.\n");
-        return;
+        hFlag=1;
+        printf("dt: a nice program to depth first traverse a directory.\n"
+                "all the flags will go here too.\n");
+        return 0;
       case 'I':
         bigIFlag=1;
         break;
@@ -121,25 +233,25 @@ int main(int argc, char* argv[]) {
         break;
       case 't':
         tFlag=1;
+        break;
       case 'u':
         uFlag=1;
+        break;
       case 'l':
         lFlag=1;
+        break;
     }
   }
+
+  int flagArray[] = { hFlag, bigIFlag, bigLFlag, dFlag, gFlag,
+                      iFlag, pFlag, sFlag, tFlag, uFlag, lFlag };
+  int faSize = sizeof(flagArray)/sizeof(flagArray[0]);
 
   for(; optind < argc; optind++) {
     printf("extra arguments: %s\n", argv[optind]);
   }
 
-  printf("Flags:");
-  int i;
-  for(i=0; i<sizeof(flagArray)/sizeof(flagArray[0]); i++) {
-    printf("%d ", flagArray[i]);
-  }
-
-  dtRecursive(".", indents);
+  dtRecursive(".", indents, flagArray, faSize);
 
   return 0;
-
 }
