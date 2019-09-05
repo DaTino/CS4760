@@ -4,8 +4,10 @@
 #include "sys/stat.h"
 #include "dirent.h"
 #include "string.h"
+#include "unistd.h"
 
 //build a stack with linked lists
+//don't need this for recursive
 struct StackNode {
   char* data;
   struct StackNode* next;
@@ -79,7 +81,64 @@ void dtRecursive(char* dir, int indents) {
 
 int main(int argc, char* argv[]) {
 
-  dtRecursive(argv[1], 2);
+  extern char *optarg;
+  extern int optind;
+  int opt, err = 0;
+  int hFlag=0, bigIFlag=0, bigLFlag=0, dFlag=0, gFlag=0,
+      pFlag=0, sFlag=0, tflag=0, uFlag=0, lFlag=0;
+  int flagArray[] = { hFlag, bigIFlag, bigLFlag, dFlag, gFlag,
+      pFlag, sFlag, tflag, uFlag, lFlag };
+  int indents = 0;
+
+  while((opt = getopt(argc, argv, ":hI:Ldgipstul")) != -1) {
+    switch(opt) {
+      case 'h':
+        hflag=1;
+        printf("dt: a nice program to depth first traverse a directory.\n
+                all the flags will go here too.\n");
+        return;
+      case 'I':
+        bigIFlag=1;
+        break;
+      case 'L':
+        bigLFlag=1;
+        break;
+      case 'd':
+        dFlag=1;
+        break;
+      case 'g':
+        gFlag=1;
+        break;
+      case 'i':
+        iFlag=1;
+        break;
+      case 'p':
+        pFlag=1;
+        break;
+      //:hI:Ldgipstul
+      case 's':
+        sFlag=1;
+        break;
+      case 't':
+        tFlag=1;
+      case 'u':
+        uFlag=1;
+      case 'l':
+        lFlag=1;
+    }
+  }
+
+  for(; optind < argc; optind++) {
+    printf("extra arguments: %s\n", argv[optind]);
+  }
+
+  printf("Flags:");
+  int i;
+  for(i=0; i<sizeof(flagArray)/sizeof(flagArray[0]); i++) {
+    printf("%d ", flagArray[i]);
+  }
+
+  dtRecursive(".", indents);
 
   return 0;
 
