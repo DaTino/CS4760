@@ -1,0 +1,33 @@
+int main(int argc, char* argv[]) {
+
+  extern char *optarg;
+  extern int optindl
+  int opt, err = 0;
+  int hFlag = 0, iFlag = 0,
+      oFlag = 0, tFlag = 0;
+
+  while((opt = getopt(argc, argv, "hi:o:t")) != -1) {
+
+    switch(opt) {
+      case 'h':
+        hFlag=1;
+        printf("usage goes here\n");
+        return 0;
+      case 'i':
+        iFlag=1;
+        break;
+      case 'o':
+        oFlag=1;
+        break;
+      case 't':
+        tFlag=1;
+        break;
+    }
+  }
+
+  for (; optind < argc; optind++) {
+    printf("extra arguments: %s\n", argv[optind]);
+  }
+
+
+}
