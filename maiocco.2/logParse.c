@@ -59,23 +59,38 @@ int main(int argc, char* argv[]) {
   int hFlag = 0, iFlag = 0,
       oFlag = 0, tFlag = 0;
 
+  char infileName[128] = "input.dat";
+  char outfileName[128] = "output.dat";
+  int nSecs = 1;
   //getopt stuff
-  while((opt = getopt(argc, argv, "hi:o:t")) != -1) {
+  while((opt = getopt(argc, argv, "hi:o:t:")) != -1) {
 
     switch(opt) {
       case 'h':
         hFlag=1;
-        printf("usage goes here\n");
+        printf("logParse!\nUsage: ./logParse [-h] [-i inputFile] [-o outputFile] [-t timer]\n");
+        printf("-h is help (this!)\n");
+        printf("-i is input filename!\n");
+        printf("-o is output filename!\n");
+        printf("-t is timer! Check the time yo!\n");
         return 0;
       case 'i':
         iFlag=1;
+        strcpy(infileName, "");
+        strcpy(infileName, optarg);
         break;
       case 'o':
         oFlag=1;
+        strcpy(outfileName, "");
+        strcpy(outfileName, optarg);
         break;
       case 't':
         tFlag=1;
+        nSecs = atoi(optarg);
         break;
+      default:
+        perror("logParse: Bad command line args. Try again, ya scalawag.\n");
+        exit(0);
     }
   }
 
@@ -85,8 +100,7 @@ int main(int argc, char* argv[]) {
 
   //file pointer initialization/opening
   FILE *fp;
-  char *filename = "input.dat";
-  fp = fopen(filename, "r");
+  fp = fopen(infileName, "r");
   if (!fp) {
     perror("logParse: Error: File not found.\n");
   }
@@ -102,7 +116,6 @@ int main(int argc, char* argv[]) {
   fclose(fp);
 
   FILE *outfile;
-  char *outfileName = "output.dat";
   outfile = fopen(outfileName, "w");
   if (!outfile) {
     perror("logParse: Error: File not found.\n");
@@ -177,10 +190,10 @@ int main(int argc, char* argv[]) {
       // }
       // printf("\n");
       //char eq[128];
-      printf("NUMSET 0 = %d\n", numSet[0]);
+      //printf("NUMSET 0 = %d\n", numSet[0]);
       int rightNow;
       int total = numSet[0];
-      printf("TOTAL =  %d\n", total);
+      //printf("TOTAL =  %d\n", total);
       if (isSubsetSum(sumSet, sizeof(sumSet)/sizeof(sumSet[0]), numSet[0], eq, rightNow = getSeconds())) {
         eq[strlen(eq)-2] = '=';
         char temp[10] = {0}, storedPid[1028] = {0};
@@ -190,7 +203,7 @@ int main(int argc, char* argv[]) {
         strcat(eq, temp);
         strcat(eq, "\n");
         strcat(storedPid, eq);
-        printf("%s\n", storedPid);
+        //printf("%s\n", storedPid);
         fputs(storedPid, outfile);
       }
       else {
