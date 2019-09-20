@@ -1,8 +1,15 @@
 #include <stdio.h>
+#include <sys/time.h>
+#include <time.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <getopt.h>
 #include <stdbool.h>
-#include <ctype.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <errno.h>
+#include <signal.h>
 
 //from geeksforgeeks
 bool isSubsetSum(int set[], int n, int sum) {
@@ -105,7 +112,7 @@ int main(int argc, char* argv[]) {
     //printf("len = %d\n", len+1);
     int numSet[len];
     //set numSets vals to 0
-    for (j=0; j<len; j++) {
+    for (j=0; j<len+1; j++) {
       numSet[j] = 0;
     }
 
@@ -119,10 +126,41 @@ int main(int argc, char* argv[]) {
         numSet[k] = numSet[k]*10+(lineList[i][j]-48);
       }
     }
-    // for (j=0; j<len; j++) {
+    // printf("---NUMSET---\n");
+    // for (j=0; j<len+1; j++) {
     //   printf("%d ", numSet[j]);
     // }
-    //printf("\n");
+    // printf("\n");
+
+    //now we have an array. we can do the subset stuff now.
+    int pid = fork();
+
+    if(pid == -1) {
+      perror("logParse: Error: Child process broke. Sorry.\n");
+    }
+    else if(pid > 0) {
+      //printf("I'm parent\n");
+    }
+    else{ //Now we do the child stuff... the subset sum
+      int sumSet[len-1];
+      int q;
+      printf("---SETTING---\n");
+      for (q = 1 ; q<sizeof(numSet)/sizeof(numSet[0])+1; q++) {
+        sumSet[q-1] = numSet[q];
+        printf("%d ", numSet[q]);
+      }
+      printf("\n");
+      printf("---SUMSET---\n");
+      for (q = 0; q<sizeof(sumSet)/sizeof(sumSet[0])+1;q++){
+        printf("%d ", sumSet[q]);
+      }
+      printf("\n");
+      if (isSubsetSum(sumSet, sizeof(sumSet)/sizeof(sumSet[0]), numSet[0]))
+        printf("%d: FUCK YEAH SUMSET\n", getpid());
+      else printf("%d: GODDAMMIT DIDNT WORK\n", getpid());
+      exit(0);
+    }
+
   }
 
 
@@ -130,13 +168,13 @@ int main(int argc, char* argv[]) {
 
 
   // debugging
-  int tot = nLines+1;
-	printf("\nThe content of the file %s are: \n", filename);
-  for(i = 0; i < tot; ++i)
-  {
-      printf("%s \n", lineList[i]);
-  }
-  printf("\n");
+  // int tot = nLines+1;
+	// printf("\nThe content of the file %s are: \n", filename);
+  // for(i = 0; i < tot; ++i)
+  // {
+  //     printf("%s \n", lineList[i]);
+  // }
+  // printf("\n");
 
 
 }
