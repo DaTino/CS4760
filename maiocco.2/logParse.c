@@ -108,7 +108,6 @@ int main(int argc, char* argv[]) {
     perror("logParse: Error: File not found.\n");
   }
 
-
   //number of subset sum problems in file
   int nLines = atoi(lineList[0]);
 
@@ -194,7 +193,9 @@ int main(int argc, char* argv[]) {
         printf("%s\n", storedPid);
         fputs(storedPid, outfile);
       }
-      else printf("%d: No list of numbers summed to %d.\n", getpid(), numSet[0]);
+      else {
+        fprintf(outfile, "%d: No list of numbers summed to %d.\n", getpid(), numSet[0]);
+      }
       exit(0);
     }
 
