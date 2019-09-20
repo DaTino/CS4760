@@ -11,7 +11,7 @@
 #include <errno.h>
 #include <signal.h>
 
-char eq[128];
+char eq[1028];
 
 int getSeconds() {
   time_t curTime;
@@ -101,11 +101,20 @@ int main(int argc, char* argv[]) {
 
   fclose(fp);
 
+  FILE *outfile;
+  char *outfileName = "output.dat";
+  outfile = fopen(outfileName, "w");
+  if (!outfile) {
+    perror("logParse: Error: File not found.\n");
+  }
+
+
   //number of subset sum problems in file
   int nLines = atoi(lineList[0]);
 
   //get number of ints in each array string.
   for(i=1; i<nLines+1; i++) {
+
 
     //get length of string from file
     int len = 0;
@@ -174,11 +183,16 @@ int main(int argc, char* argv[]) {
       int total = numSet[0];
       printf("TOTAL =  %d\n", total);
       if (isSubsetSum(sumSet, sizeof(sumSet)/sizeof(sumSet[0]), numSet[0], eq, rightNow = getSeconds())) {
-        printf("%s\n", eq);
         eq[strlen(eq)-2] = '=';
-        printf("%d: ", getpid());
-        printf("%s", eq);
-        printf("%d\n", total);
+        char temp[10] = {0}, storedPid[1028] = {0};
+        sprintf(storedPid, "%d", getpid());
+        strcat(storedPid, ": ");
+        sprintf(temp, "%d", numSet[0]);
+        strcat(eq, temp);
+        strcat(eq, "\n");
+        strcat(storedPid, eq);
+        printf("%s\n", storedPid);
+        fputs(storedPid, outfile);
       }
       else printf("%d: No list of numbers summed to %d.\n", getpid(), numSet[0]);
       exit(0);
