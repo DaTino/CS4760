@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <ctype.h>
 
 //from geeksforgeeks
 bool isSubsetSum(int set[], int n, int sum) {
@@ -35,9 +36,9 @@ bool isSubsetSum(int set[], int n, int sum) {
      return subset[n][sum];
 }
 
-
 int main(int argc, char* argv[]) {
 
+  //initialize getopt vars
   extern char *optarg;
   extern int optind;
   int opt, err = 0;
@@ -68,13 +69,74 @@ int main(int argc, char* argv[]) {
     printf("extra arguments: %s\n", argv[optind]);
   }
 
-  FILE *fptr;
+  //file pointer initialization/opening
+  FILE *fp;
   char *filename = "input.dat";
-  fptr = fopen(filename, "r");
-  if (fptr == NULL) {
+  fp = fopen(filename, "r");
+  if (!fp) {
     perror("logParse: Error: File not found.\n");
   }
 
+  //read strings from file into array
+  char lineList[32][127];
+  int i = 0;
+  while(fgets(lineList[i], sizeof(lineList[i]), fp)) {
+    lineList[i][strlen(lineList[i]) - 1] = '\0';
+    i++;
+  }
+
+  fclose(fp);
+
+  //number of subset sum problems in file
+  int nLines = atoi(lineList[0]);
+
+  //get number of ints in each array string.
+  for(i=1; i<nLines+1; i++) {
+
+    //get length of string from file
+    int len = 0;
+    int j;
+    for (j=0; lineList[i][j]!='\0'; j++) {
+      //printf("%c", lineList[i][j]);
+      if (isspace(lineList[i][j])) {
+        len++;
+      }
+    }
+    //printf("len = %d\n", len+1);
+    int numSet[len];
+    //set numSets vals to 0
+    for (j=0; j<len; j++) {
+      numSet[j] = 0;
+    }
+
+    //fill numSet with int values from list
+    int k=0;
+    for(j=0; lineList[i][j]!='\0'; j++) {
+      if (isspace(lineList[i][j])) {
+        k++;
+      }
+      else {
+        numSet[k] = numSet[k]*10+(lineList[i][j]-48);
+      }
+    }
+    // for (j=0; j<len; j++) {
+    //   printf("%d ", numSet[j]);
+    // }
+    //printf("\n");
+  }
+
+
+
+
+
+  // debugging
+  int tot = nLines+1;
+	printf("\nThe content of the file %s are: \n", filename);
+  for(i = 0; i < tot; ++i)
+  {
+      printf("%s \n", lineList[i]);
+  }
+  printf("\n");
 
 
 }
