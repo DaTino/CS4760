@@ -133,13 +133,18 @@ int main(int argc, char* argv[]) {
     // printf("\n");
 
     //now we have an array. we can do the subset stuff now.
-    int pid = fork();
+    int wstatus;
+    pid_t pid = fork(), waitStat;
 
     if(pid == -1) {
       perror("logParse: Error: Child process broke. Sorry.\n");
     }
     else if(pid > 0) {
       //printf("I'm parent\n");
+      do {
+        waitStat = waitpid(pid, &wstatus, WUNTRACED | WCONTINUED);
+        if (waitStat == -1) break;
+      } while (!WIFEXITED(wstatus) && !WIFSIGNALED(wstatus));
     }
     else{ //Now we do the child stuff... the subset sum
       int sumSet[len-1];
