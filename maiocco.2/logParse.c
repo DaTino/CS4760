@@ -11,36 +11,43 @@
 #include <errno.h>
 #include <signal.h>
 
+char eq[128];
+
+int getSeconds() {
+  time_t curTime;
+  time(&curTime);
+  struct tm *local = localtime(&curTime);
+  int seconds = local->tm_sec;
+  return seconds;
+}
+
 //from geeksforgeeks
-bool isSubsetSum(int set[], int n, int sum) {
-    // The value of subset[i][j] will be true if there is a
-    // subset of set[0..j-1] with sum equal to i
-    bool subset[n+1][sum+1];
-    // If sum is 0, then answer is true
-    for (int i = 0; i <= n; i++)
-      subset[i][0] = true;
-    // If sum is not 0 and set is empty, then answer is false
-    for (int i = 1; i <= sum; i++)
-      subset[0][i] = false;
-     // Fill the subset table in botton up manner
-     for (int i = 1; i <= n; i++) {
-       for (int j = 1; j <= sum; j++) {
-         if(j<set[i-1]) {
-           subset[i][j] = subset[i-1][j];
-         }
-         if (j >= set[i-1]) {
-           subset[i][j] = subset[i-1][j] ||  subset[i - 1][j-set[i-1]];
-         }
-       }
-     }
-     /*   // uncomment this code to print table
-     for (int i = 0; i <= n; i++)
-     {
-       for (int j = 0; j <= sum; j++)
-          printf ("%4d", subset[i][j]);
-       printf("\n");
-     }*/
-     return subset[n][sum];
+bool isSubsetSum(int set[], int n, int sum, char* eq, int curTime) {
+    if( getSeconds() - curTime == 1) {
+      printf("%d: ", getpid());
+      perror("logParse: Timeout on subset sum.\n");
+    }
+    if(sum==0) {
+      return true;
+    }
+    if(n==0 && sum !=0){
+      return false;
+    }
+    if(set[n-1] > sum) {
+      return isSubsetSum(set, n-1, sum, eq, curTime);
+    }
+    if(isSubsetSum(set, n-1, sum, eq, curTime) == true) {
+      return true;
+    }
+    else if (isSubsetSum(set, n-1, sum-set[n-1], eq, curTime)) {
+      char* temp;
+      sprintf(temp, "%d", set[n-1]);
+      strcat(eq, temp);
+      strcat(eq, " + ");
+      //printf("%s\n", eq);
+      return true;
+    }
+    else return false;
 }
 
 int main(int argc, char* argv[]) {
@@ -126,6 +133,7 @@ int main(int argc, char* argv[]) {
         numSet[k] = numSet[k]*10+(lineList[i][j]-48);
       }
     }
+
     // printf("---NUMSET---\n");
     // for (j=0; j<len+1; j++) {
     //   printf("%d ", numSet[j]);
@@ -149,29 +157,34 @@ int main(int argc, char* argv[]) {
     else{ //Now we do the child stuff... the subset sum
       int sumSet[len-1];
       int q;
-      printf("---SETTING---\n");
+      //printf("---SETTING---\n");
       for (q = 1 ; q<sizeof(numSet)/sizeof(numSet[0])+1; q++) {
         sumSet[q-1] = numSet[q];
-        printf("%d ", numSet[q]);
+        //printf("%d ", numSet[q]);
       }
-      printf("\n");
-      printf("---SUMSET---\n");
-      for (q = 0; q<sizeof(sumSet)/sizeof(sumSet[0])+1;q++){
-        printf("%d ", sumSet[q]);
+      // printf("\n");
+      // printf("---SUMSET---\n");
+      // for (q = 0; q<sizeof(sumSet)/sizeof(sumSet[0])+1;q++){
+      //   printf("%d ", sumSet[q]);
+      // }
+      // printf("\n");
+      //char eq[128];
+      printf("NUMSET 0 = %d\n", numSet[0]);
+      int rightNow;
+      int total = numSet[0];
+      printf("TOTAL =  %d\n", total);
+      if (isSubsetSum(sumSet, sizeof(sumSet)/sizeof(sumSet[0]), numSet[0], eq, rightNow = getSeconds())) {
+        printf("%s\n", eq);
+        eq[strlen(eq)-2] = '=';
+        printf("%d: ", getpid());
+        printf("%s", eq);
+        printf("%d\n", total);
       }
-      printf("\n");
-      if (isSubsetSum(sumSet, sizeof(sumSet)/sizeof(sumSet[0]), numSet[0]))
-        printf("%d: FUCK YEAH SUMSET\n", getpid());
-      else printf("%d: GODDAMMIT DIDNT WORK\n", getpid());
+      else printf("%d: No list of numbers summed to %d.\n", getpid(), numSet[0]);
       exit(0);
     }
 
   }
-
-
-
-
-
   // debugging
   // int tot = nLines+1;
 	// printf("\nThe content of the file %s are: \n", filename);
